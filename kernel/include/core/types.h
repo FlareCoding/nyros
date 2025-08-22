@@ -42,7 +42,4 @@ typedef uint64_t uintptr_t;
 #define EXTERN_C extern
 #endif
 
-#define __force_inline__ inline __attribute__((always_inline))
-#define __unused (void)
-
 #endif

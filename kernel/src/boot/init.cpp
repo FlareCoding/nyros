@@ -7,7 +7,7 @@ void init(unsigned int magic, void* mbi) {
         while (true) { asm volatile ("hlt"); }
     }
 
-    __unused mbi;
+    (void)mbi;
 
     // Initialize early stage serial output
     serial::init_port(SERIAL_PORT_BASE_COM1);
