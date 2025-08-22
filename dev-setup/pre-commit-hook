@@ -1,0 +1,25 @@
+#!/bin/bash
+# Pre-commit hook for Nyros
+# Install with: cp dev-setup/pre-commit-hook .git/hooks/pre-commit
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "$SCRIPT_DIR/../scripts/run-ci-checks.sh" ]; then
+    PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+elif [ -f "$SCRIPT_DIR/scripts/run-ci-checks.sh" ]; then
+    PROJECT_ROOT="$SCRIPT_DIR"
+else
+    echo "Error: Could not find project root"
+    exit 1
+fi
+
+cd "$PROJECT_ROOT"
+
+echo "Running pre-commit checks..."
+
+# Run a subset of CI checks (faster for pre-commit)
+# Only check formatting and basic static analysis on modified files
+./scripts/run-ci-checks.sh --no-build-tests --static-analysis-only
+
+echo "Pre-commit checks passed!"

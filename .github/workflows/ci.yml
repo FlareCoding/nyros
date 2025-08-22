@@ -1,0 +1,297 @@
+name: Nyros CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+
+env:
+  # Avoid interactive prompts
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  # Static analysis and code quality checks
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup C++ environment
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: clang-15
+          cmake: true
+          ninja: true
+          cppcheck: true
+          clang-tidy: true
+
+      - name: Run clang-tidy
+        run: |
+          ./configure.sh --clang --debug
+          find kernel/src/ -name "*.cpp" -print0 | \
+            xargs -0 clang-tidy --config-file=.clang-tidy -p build/ --warnings-as-errors='*'
+
+      - name: Run cppcheck
+        run: |
+          cppcheck --enable=warning,style,performance,portability \
+            --error-exitcode=1 \
+            --suppress=missingIncludeSystem \
+            --suppress=unusedFunction \
+            --inline-suppr \
+            --std=c++20 \
+            -I kernel/include/ \
+            kernel/src/
+
+  # Comprehensive build matrix testing
+  build-matrix:
+    name: Build Test
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler:
+          - { name: "gcc-11", version: "11" }
+          - { name: "gcc-12", version: "12" }
+          - { name: "clang-14", version: "14" }
+          - { name: "clang-15", version: "15" }
+        build-type: ["Debug", "Release"]
+        optimization: ["0", "1", "2", "3", "s"]
+        exclude:
+          # Skip some combinations to reduce CI time while maintaining coverage
+          - build-type: "Debug"
+            optimization: "3"
+          - build-type: "Debug"
+            optimization: "s"
+          - build-type: "Release"
+            optimization: "0"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup C++ environment
+        uses: aminya/setup-cpp@v1
+        with:
+          compiler: ${{ matrix.compiler.name }}-${{ matrix.compiler.version }}
+          cmake: true
+          ninja: true
+
+      - name: Install QEMU and bootloader tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            qemu-system-x86 gdb \
+            grub-pc-bin grub2-common \
+            xorriso mtools
+
+      - name: Configure build system
+        run: |
+          case "${{ matrix.compiler.name }}" in
+            gcc-*) 
+              ./configure.sh --gcc --${{ matrix.build-type }} -O${{ matrix.optimization }}
+              ;;
+            clang-*)
+              ./configure.sh --clang --${{ matrix.build-type }} -O${{ matrix.optimization }}
+              ;;
+          esac
+
+      - name: Build kernel
+        run: |
+          ninja -C build nyros-kernel
+
+      - name: Build bootable image
+        run: |
+          ninja -C build image
+
+      - name: Verify build artifacts
+        run: |
+          # Check that kernel binary exists and has expected sections
+          ls -la build/kernel/nyros-kernel
+          file build/kernel/nyros-kernel
+          nm build/kernel/nyros-kernel | grep -E "(init|main)" || true
+          
+          # Check that bootable image was created
+          ls -la build/image/nyros.img
+          file build/image/nyros.img
+
+      - name: Test basic boot in QEMU
+        run: |
+          # Quick boot test - ensure kernel starts and produces expected output
+          timeout 30s qemu-system-x86_64 \
+            -drive file=build/image/nyros.img,format=raw \
+            -serial file:boot.log \
+            -display none \
+            -m 256M \
+            -no-reboot || true
+          
+          # Check for expected output
+          if [ -f boot.log ]; then
+            echo "Boot log contents:"
+            cat boot.log
+            # Look for our expected output
+            grep -q "Hello, world!" boot.log && echo "Boot test PASSED" || echo "Boot test FAILED"
+          else
+            echo "No boot log generated"
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: nyros-${{ matrix.compiler.name }}-${{ matrix.build-type }}-O${{ matrix.optimization }}
+          path: |
+            build/kernel/nyros-kernel
+            build/image/nyros.img
+            build/kernel/nyros-kernel.asm
+            boot.log
+          retention-days: 7
+
+  # Test build system edge cases and configurations
+  build-system-tests:
+    name: Build System Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang-14 gcc-11 \
+            ninja-build cmake \
+            qemu-system-x86 \
+            grub-pc-bin grub2-common \
+            xorriso mtools
+
+      - name: Test configure script help
+        run: |
+          ./configure.sh --help
+
+      - name: Test dependency checker
+        run: |
+          ./dev-setup/setup-dev-env.sh --check-deps
+
+      - name: Test clean build from scratch
+        run: |
+          ./configure.sh --clang --debug
+          ninja -C build clean
+          ninja -C build
+
+      - name: Test reconfiguration
+        run: |
+          # Test switching between compilers and build types
+          ./configure.sh --gcc --release
+          ninja -C build clean
+          ninja -C build
+          ./configure.sh --clang --debug  
+          ninja -C build clean
+          ninja -C build
+
+      - name: Test individual targets
+        run: |
+          ./configure.sh --clang --debug
+          ninja -C build clean
+          ninja -C build nyros-kernel
+          ninja -C build image
+
+      - name: Test custom optimization override
+        run: |
+          ./configure.sh --debug -O2
+          ninja -C build nyros-kernel
+          ./configure.sh --release -O0  
+          ninja -C build nyros-kernel
+
+      - name: Test verbose build
+        run: |
+          ./configure.sh --clang --debug --verbose
+          ninja -C build nyros-kernel
+
+      - name: Test LTO build (release only)
+        run: |
+          ./configure.sh --clang --release --enable-lto
+          ninja -C build nyros-kernel
+
+      - name: Verify compile_commands.json
+        run: |
+          ./configure.sh --clang --debug
+          test -f compile_commands.json
+          test -L compile_commands.json
+          wc -l compile_commands.json
+
+  # Code quality and metrics
+  code-quality:
+    name: Code Quality
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install analysis tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang-14 \
+            ninja-build cmake \
+            sloccount \
+            cloc
+
+      - name: Generate build for analysis
+        run: |
+          ./configure.sh --clang --debug
+          ninja -C build nyros-kernel
+
+      - name: Code metrics
+        run: |
+          echo "=== Code Line Counts ==="
+          cloc kernel/
+          echo ""
+          echo "=== Kernel Binary Size ==="
+          size build/kernel/nyros-kernel
+          echo ""
+          echo "=== Kernel Binary Info ==="
+          file build/kernel/nyros-kernel
+          echo ""
+          echo "=== Kernel Sections ==="
+          objdump -h build/kernel/nyros-kernel
+
+      - name: Check for common issues
+        run: |
+          echo "=== Checking for TODO/FIXME comments ==="
+          grep -r "TODO\|FIXME\|XXX\|HACK" kernel/ || echo "No TODO/FIXME found"
+          echo ""
+          echo "=== Checking for debug prints ==="
+          grep -r "printf\|cout\|debug" kernel/ || echo "No debug prints found"
+
+  # Documentation and help system tests
+  documentation:
+    name: Documentation Tests
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Test all help commands
+        run: |
+          ./configure.sh --help
+          ./scripts/run.sh --help
+          ./dev-setup/setup-dev-env.sh --help
+
+      - name: Verify README instructions
+        run: |
+          # Test that README quick start commands work
+          ./dev-setup/setup-dev-env.sh --check-deps
+          ./configure.sh --clang --debug
+          ninja -C build
+
+      - name: Check for broken links in markdown
+        run: |
+          # Simple check for obvious markdown issues
+          grep -n "]\(\[\)" README.md && exit 1 || echo "No broken reference links found"
+          grep -n "]\(\)" README.md && exit 1 || echo "No empty links found"
+

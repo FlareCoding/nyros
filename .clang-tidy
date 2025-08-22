@@ -1,0 +1,119 @@
+# Clang-tidy configuration for Nyros kernel development
+# Focus on kernel-appropriate checks while avoiding standard library assumptions
+
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-implicit-widening-of-multiplication-result,
+  -bugprone-narrowing-conversions,
+  -bugprone-reserved-identifier,
+  -bugprone-macro-parentheses,
+  -bugprone-dynamic-static-initializers,
+  cert-*,
+  -cert-err58-cpp,
+  -cert-dcl21-cpp,
+  -cert-dcl37-c,
+  -cert-dcl51-cpp,
+  clang-analyzer-*,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-pro-type-vararg,
+  -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-no-malloc,
+  -cppcoreguidelines-macro-usage,
+  -cppcoreguidelines-avoid-non-const-global-variables,
+  -cppcoreguidelines-init-variables,
+  -cppcoreguidelines-narrowing-conversions,
+  hicpp-*,
+  -hicpp-avoid-c-arrays,
+  -hicpp-no-malloc,
+  -hicpp-vararg,
+  -hicpp-no-assembler,
+  -hicpp-signed-bitwise,
+  -hicpp-braces-around-statements,
+  misc-unused-parameters,
+  misc-unused-using-decls,
+  misc-redundant-expression,
+  misc-unused-alias-decls,
+  misc-definitions-in-headers,
+  bugprone-unused-raii,
+  bugprone-unused-return-value,
+  readability-isolate-declaration,
+  readability-redundant-declaration,
+  readability-redundant-member-init,
+  readability-redundant-string-init,
+  modernize-*,
+  -modernize-avoid-c-arrays,
+  -modernize-use-trailing-return-type,
+  -modernize-use-using,
+  performance-*,
+  portability-*,
+  readability-*,
+  -readability-magic-numbers,
+  -readability-uppercase-literal-suffix,
+  -readability-avoid-const-params-in-decls,
+  -readability-braces-around-statements,
+  -readability-implicit-bool-conversion
+
+# Header filter to only check project files
+HeaderFilterRegex: 'kernel/.*'
+
+# Analysis options
+AnalyzeTemporaryDtors: false
+
+CheckOptions:
+  # Naming conventions for kernel code
+  - key: readability-identifier-naming.ClassCase
+    value: lower_case
+  - key: readability-identifier-naming.StructCase
+    value: lower_case
+  - key: readability-identifier-naming.EnumCase
+    value: lower_case
+  - key: readability-identifier-naming.FunctionCase
+    value: lower_case
+  - key: readability-identifier-naming.VariableCase
+    value: lower_case
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case
+  - key: readability-identifier-naming.MemberCase
+    value: lower_case
+  - key: readability-identifier-naming.ConstantCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.MacroCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case
+  - key: readability-identifier-naming.TypedefCase
+    value: lower_case
+  
+  # Function length limits
+  - key: readability-function-size.LineThreshold
+    value: '100'
+  - key: readability-function-size.StatementThreshold
+    value: '50'
+  
+  # Performance settings
+  - key: performance-move-const-arg.CheckTriviallyCopyableMove
+    value: 'false'
+  
+  # Modernize settings
+  - key: modernize-loop-convert.MaxCopySize
+    value: '32'
+  - key: modernize-loop-convert.MinConfidence
+    value: 'reasonable'
+  
+  # Bugprone settings
+  - key: bugprone-argument-comment.StrictMode
+    value: 'true'
+  - key: bugprone-assert-side-effect.AssertMacros
+    value: 'assert,ASSERT,KASSERT'
+  
+  # Core guidelines settings
+  - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
+    value: 'true'
