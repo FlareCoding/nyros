@@ -28,50 +28,21 @@ typedef __UINT64_TYPE__ uint64_t;
 typedef __UINT64_TYPE__ size_t;
 #endif
 
-#define UINTPTR_MAX       18446744073709551615UL
-#define SIZE_MAX          UINTPTR_MAX
+#define UINTPTR_MAX 18446744073709551615UL
+#define SIZE_MAX UINTPTR_MAX
 
 typedef uint64_t uintptr_t;
-#define NULL    0
+#define NULL 0
 
-#define offsetof(type, member) ((uintptr_t) &(((type *)0)->member))
+#define offsetof(type, member) ((uintptr_t)&(((type*)0)->member))
 
 #if defined(__cplusplus)
-    #define EXTERN_C extern "C"
+#define EXTERN_C extern "C"
 #else
-    #define EXTERN_C extern
+#define EXTERN_C extern
 #endif
 
 #define __force_inline__ inline __attribute__((always_inline))
 #define __unused (void)
-
-#define __UNIT_TEST __attribute__((used, section(".unit_test")))
-#define __UNIT_TEST_UNUSED __attribute__((used, section(".unit_test_unused")))
-
-/**
- * @macro DECLARE_GLOBAL_OBJECT
- * @brief Declares and initializes a global object with proper constructor invocation.
- * 
- * This macro ensures that global objects of non-POD (Plain Old Data) types are
- * correctly value-initialized by invoking their constructors. In some environments,
- * such as bare-metal kernels, the default initialization of global objects
- * (`type name;`) does not guarantee that the constructor will be called. 
- * This can lead to uninitialized member variables and undefined behavior.
- *
- * By using this macro, the constructor is explicitly called through 
- * value initialization (`type name = type();`), ensuring the object is 
- * fully and properly initialized.
- *
- * @param type The type of the global object.
- * @param name The name of the global object.
- *
- * @note Always use this macro when declaring global objects of classes 
- *       that require constructor invocation to initialize internal state.
- *
- * @example
- * // Declare a global spinlock with proper initialization
- * DECLARE_GLOBAL_OBJECT(spinlock, g_lock);
- */
-#define DECLARE_GLOBAL_OBJECT(type, name) type name = type()
 
 #endif
