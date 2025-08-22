@@ -56,9 +56,12 @@ target_compile_options(nyros-kernel-options INTERFACE
     -Wall
     -Wextra
     -Werror
-    -Wno-unused-parameter
-    -Wno-unused-variable
-    -Wno-unused-but-set-variable
+    -Wunused-variable
+    -Wunused-function
+    -Wunused-parameter
+    -Wunused-value
+    -Wunused-label
+    -Wunused-local-typedefs
     -Wframe-larger-than=2048
     -Wimplicit-fallthrough
 )
@@ -131,6 +134,8 @@ endif()
 # GCC-specific flags
 if(NYROS_USING_GCC)
     target_compile_options(nyros-kernel-options INTERFACE
+        -Wunused-but-set-variable
+        -Wunused-but-set-parameter
         -Wno-stringop-truncation
         -Wno-stringop-overflow
         -Wno-restrict
