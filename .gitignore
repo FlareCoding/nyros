@@ -1,0 +1,51 @@
+# Directories
+.vscode/
+.cache/
+build/
+bin/
+__pycache__/
+docs/output/
+
+# Toolchain build artifacts and fetched sources (keep scripts/ directory)
+toolchain/dist/
+toolchain/build/
+toolchain/src/
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+*.efi
+
+# QEMU/Debug files
+usb_debug.log
+com1.serial
+com2.serial
