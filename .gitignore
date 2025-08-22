@@ -1,6 +1,7 @@
 # Directories
 .vscode/
 .cache/
+.clangd/
 build/
 bin/
 __pycache__/
@@ -49,3 +50,6 @@ toolchain/src/
 usb_debug.log
 com1.serial
 com2.serial
+
+# Build database
+compile_commands.json

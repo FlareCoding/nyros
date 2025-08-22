@@ -1,0 +1,91 @@
+# Nyros kernel code formatting configuration
+# Based on LLVM style with kernel-specific adjustments
+
+BasedOnStyle: LLVM
+Language: Cpp
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+IndentCaseLabels: true
+IndentPPDirectives: None
+IndentGotoLabels: false
+
+# Line length
+ColumnLimit: 100
+
+# Braces
+BreakBeforeBraces: Allman
+BraceWrapping:
+  AfterClass: true
+  AfterControlStatement: false
+  AfterEnum: true
+  AfterFunction: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  BeforeCatch: false
+  BeforeElse: false
+  IndentBraces: false
+
+# Spaces
+SpaceAfterCStyleCast: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+SpacesInCStyleCastParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+# Alignment
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignEscapedNewlines: Right
+AlignOperands: true
+AlignTrailingComments: true
+
+# Other
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBinaryOperators: None
+BreakBeforeTernaryOperators: true
+BreakStringLiterals: true
+CompactNamespaces: false
+FixNamespaceComments: true
+KeepEmptyLinesAtTheStartOfBlocks: false
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+PointerAlignment: Left
+ReflowComments: true
+SortIncludes: true
+SortUsingDeclarations: true
+
+# Penalties (for line breaking decisions)
+PenaltyBreakBeforeFirstCallParameter: 19
+PenaltyBreakComment: 300
+PenaltyBreakString: 1000
+PenaltyExcessCharacter: 1000000
+PenaltyReturnTypeOnItsOwnLine: 60
+
+# C++20 specific
+Standard: c++20
+RequiresClausePosition: OwnLine
+
+# Include categories for sorting
+IncludeCategories:
+  - Regex:           '^".*\.h"'
+    Priority:        1
+  - Regex:           '^<.*\.h>'
+    Priority:        2
+  - Regex:           '^<.*>'
+    Priority:        3
+  - Regex:           '.*'
+    Priority:        4

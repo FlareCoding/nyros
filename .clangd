@@ -1,0 +1,55 @@
+# Clangd configuration for Nyros kernel development
+# This configures language servers to understand our kernel environment
+
+CompileFlags:
+  # Use compile_commands.json from build directory
+  CompilationDatabase: build/
+  
+  # Additional flags to help clangd understand kernel code
+  Add:
+    - "-ffreestanding"
+    - "-nostdlib"
+    - "-fno-builtin"
+    - "-fno-exceptions"
+    - "-fno-rtti"
+    - "-fno-stack-protector"
+    - "-m64"
+    - "-mno-red-zone"
+    - "-mno-sse"
+    - "-mno-mmx"
+    - "-mcmodel=kernel"
+    - "-std=c++20"
+    - "-DARCH_X86_64"
+    - "-DNYROS_KERNEL"
+    - "-I../kernel/include"
+    - "-I../kernel/include/arch/x86"
+  
+  # Remove any default system includes that might be added
+  Remove:
+    - "-stdlib=*"
+
+Diagnostics:
+  # Suppress warnings that don't apply to kernel code
+  Suppress:
+    - "no_such_file_or_directory"  # For missing standard headers
+    - "pp_file_not_found"          # For missing preprocessor files
+  
+  # Treat these as errors
+  ClangTidy:
+    Add:
+      - bugprone-*
+      - performance-*
+      - readability-identifier-naming
+    Remove:
+      - readability-magic-numbers
+      - bugprone-easily-swappable-parameters
+
+Index:
+  # Speed up indexing for large codebases
+  Background: Build
+
+InlayHints:
+  # Enable helpful hints
+  Enabled: true
+  ParameterNames: true
+  DeducedTypes: true

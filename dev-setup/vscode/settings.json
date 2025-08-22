@@ -1,0 +1,67 @@
+{
+    // Nyros kernel development settings for VS Code
+    // C/C++ Extension Configuration
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+    "C_Cpp.default.compilerPath": "/usr/bin/clang++",
+    "C_Cpp.default.cppStandard": "c++20",
+    "C_Cpp.default.cStandard": "c11",
+    "C_Cpp.default.intelliSenseMode": "linux-clang-x64",
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+    // Disable features that don't apply to kernel development
+    "C_Cpp.default.systemIncludePath": [],
+    "C_Cpp.autoAddFileAssociations": false,
+    // CMake configuration
+    "cmake.configureOnOpen": false,
+    "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.generator": "Ninja",
+    // Clangd configuration (if using clangd instead of C/C++ extension)
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}/build",
+        "--background-index",
+        "--clang-tidy",
+        "--header-insertion=never",
+        "--pch-storage=memory",
+        "--function-arg-placeholders=false"
+    ],
+    // File associations
+    "files.associations": {
+        "*.S": "asm-intel-x86-generic",
+        "*.ld": "ldscript",
+        "*.h": "c",
+        "*.hpp": "cpp",
+        "*.cpp": "cpp",
+        "*.c": "c"
+    },
+    // Editor settings
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.rulers": [
+        80,
+        100
+    ],
+    // Exclude build artifacts from search
+    "files.exclude": {
+        "**/build": true,
+        "**/*.o": true,
+        "**/*.a": true,
+        "**/*.bin": true,
+        "**/*.img": true,
+        "**/*.iso": true
+    },
+    // Search exclude patterns
+    "search.exclude": {
+        "**/build": true,
+        "**/ovmf": true,
+        "**/*.fd": true
+    },
+    // Terminal settings for build commands
+    "terminal.integrated.env.linux": {
+        "NYROS_PROJECT_ROOT": "${workspaceFolder}"
+    },
+    // Task and debug configurations
+    "files.watcherExclude": {
+        "**/build/**": true,
+        "**/ovmf/**": true
+    }
+}

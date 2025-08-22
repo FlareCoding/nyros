@@ -25,10 +25,12 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --release)
             BUILD_TYPE="Release"
+            EXTRA_ARGS="$EXTRA_ARGS -DNYROS_OPTIMIZATION_LEVEL=2"
             shift
             ;;
         --debug)
             BUILD_TYPE="Debug"
+            EXTRA_ARGS="$EXTRA_ARGS -DNYROS_OPTIMIZATION_LEVEL=0"
             shift
             ;;
         --clang)
@@ -59,14 +61,20 @@ while [[ $# -gt 0 ]]; do
             EXTRA_ARGS="$EXTRA_ARGS -DNYROS_VERBOSE_BUILD=ON"
             shift
             ;;
+        -O*)
+            # Extract optimization level from -O0, -O1, -O2, -O3, -Os, -Oz
+            OPT_LEVEL="${1#-O}"
+            EXTRA_ARGS="$EXTRA_ARGS -DNYROS_OPTIMIZATION_LEVEL=$OPT_LEVEL"
+            shift
+            ;;
         --help)
             echo "Nyros Configuration Script"
             echo ""
             echo "Usage: $0 [options]"
             echo ""
             echo "Options:"
-            echo "  --release         Configure for Release build"
-            echo "  --debug           Configure for Debug build (default)"
+            echo "  --release         Configure for Release build (optimization level 2)"
+            echo "  --debug           Configure for Debug build (optimization level 0, default)"
             echo "  --clang           Use Clang compiler"
             echo "  --gcc             Use GCC compiler"
             echo "  --build-dir DIR   Set build directory (default: build)"
@@ -74,6 +82,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --enable-tests    Enable unit tests"
             echo "  --enable-lto      Enable Link-Time Optimization"
             echo "  --verbose         Enable verbose builds"
+            echo "  -O<level>         Override optimization level (0, 1, 2, 3, s, z)"
             echo "  --help            Show this help"
             echo ""
             echo "After configuration, use ninja to build:"
@@ -120,6 +129,12 @@ cmake \
 if [ $? -eq 0 ]; then
     echo ""
     echo -e "${GREEN}Configuration successful!${NC}"
+    
+    # Create symlink for compile_commands.json (for IDE/editor support)
+    if [ -f "$BUILD_DIR/compile_commands.json" ]; then
+        echo "Creating compile_commands.json symlink for IDE support..."
+        ln -sf "$BUILD_DIR/compile_commands.json" compile_commands.json
+    fi
     echo ""
     echo "Build commands:"
     echo "  ninja -C $BUILD_DIR               # Build everything (kernel + bootable image)"

@@ -35,7 +35,13 @@ endif()
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo")
 
 # Optimization level
-set(NYROS_OPTIMIZATION_LEVEL "2" CACHE STRING "Compiler optimization level (0-3)")
+if(NOT DEFINED NYROS_OPTIMIZATION_LEVEL)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(NYROS_OPTIMIZATION_LEVEL "0" CACHE STRING "Compiler optimization level (0-3)")
+    else()
+        set(NYROS_OPTIMIZATION_LEVEL "2" CACHE STRING "Compiler optimization level (0-3)")
+    endif()
+endif()
 set_property(CACHE NYROS_OPTIMIZATION_LEVEL PROPERTY STRINGS "0" "1" "2" "3" "s" "z")
 
 # =============================================================================
@@ -49,6 +55,18 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+# Export compile commands for IDE/editor support
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+# Create symlink to compile_commands.json in root directory for editor support
+add_custom_target(compile-commands-symlink ALL
+    COMMAND ${CMAKE_COMMAND} -E create_symlink 
+        ${CMAKE_BINARY_DIR}/compile_commands.json 
+        ${CMAKE_SOURCE_DIR}/compile_commands.json
+    COMMENT "Creating compile_commands.json symlink for IDE support"
+    VERBATIM
+)
 
 # Kernel-specific output location
 set(NYROS_KERNEL_OUTPUT_DIR ${CMAKE_BINARY_DIR}/kernel)

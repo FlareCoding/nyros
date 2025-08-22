@@ -1,113 +1,268 @@
 # Nyros Operating System
 
-Nyros is a modern x86_64 operating system built from scratch with a focus on clean architecture and modern development practices.
+A modern x86_64 kernel written in C++20, designed with debuggability and robustness in mind.
 
-## Prerequisites
-
-Install the required dependencies on Ubuntu/Debian:
+## 🚀 Quick Start for New Contributors
 
 ```bash
-sudo apt-get install -y \
-    build-essential cmake ninja-build \
-    grub-pc-bin grub-efi-amd64-bin \
-    xorriso mtools \
-    qemu-system-x86 ovmf
+# 1. Clone the repository
+git clone https://github.com/FlareCoding/nyros.git
+cd nyros
+
+# 2. Set up development environment (checks dependencies, configures build, shows editor setup)
+./dev-setup/setup-dev-env.sh --all
+
+# 3. Build and run
+ninja -C build        # Build everything
+./scripts/run.sh      # Run in QEMU
 ```
 
-## Building
+That's it! Your development environment is ready. 🎉
 
-### First Time Setup
+## 📋 Prerequisites
 
+### System Requirements
+- **OS**: Linux (Ubuntu 20.04+, Fedora 35+, Arch Linux)
+- **Architecture**: x86_64 host system
+
+### Required Dependencies
+The setup script will check these automatically:
+
+- **Compiler**: Clang 12+ or GCC 10+ (Clang recommended)
+- **Build Tools**: CMake 3.20+, Ninja
+- **Emulation**: QEMU (qemu-system-x86_64)
+- **Debugging**: GDB 10+
+- **Image Tools**: grub-mkrescue, xorriso, mtools
+
+### Quick Install (Ubuntu/Debian)
 ```bash
-# Configure the build system (one time only)
-./configure.sh
+sudo apt update && sudo apt install -y \\
+    clang ninja-build cmake \\
+    qemu-system-x86 gdb \\
+    grub-pc-bin grub2-common \\
+    xorriso mtools
+```
 
-# Or configure with specific options
-./configure.sh --release        # Release build
-./configure.sh --clang          # Use Clang instead of GCC
-./configure.sh --help           # See all options
+<details>
+<summary>Other distributions (click to expand)</summary>
+
+#### Fedora
+```bash
+sudo dnf install -y \\
+    clang ninja-build cmake \\
+    qemu-system-x86 gdb \\
+    grub2-tools-extra grub2-pc-modules \\
+    xorriso mtools
+```
+
+#### Arch Linux
+```bash
+sudo pacman -S \\
+    clang ninja cmake \\
+    qemu-arch-extra gdb \\
+    grub xorriso mtools
+```
+</details>
+
+## 🛠️ Development Workflow
+
+### Initial Setup
+```bash
+# Configure for debug build with Clang (recommended)
+./configure.sh --clang --debug
+
+# Or configure for release build with GCC
+./configure.sh --gcc --release
 ```
 
 ### Building
-
-After configuration, use ninja:
-
 ```bash
-ninja -C build              # Build everything (kernel + bootable image)
-ninja -C build nyros-kernel # Build kernel only
-ninja -C build clean        # Clean build artifacts
-ninja -C build help         # Show all targets
+# Build everything (kernel + bootable image)
+ninja -C build
+
+# Build kernel only
+ninja -C build nyros-kernel
+
+# Clean build artifacts
+ninja -C build clean
 ```
 
-### Reconfiguring
-
+### Running & Testing
 ```bash
-# Change build configuration
-./configure.sh --release    # Switch to release mode
-./configure.sh --debug      # Switch back to debug mode
-rm -rf build                # Remove entire build directory
+# Run in QEMU (GUI)
+./scripts/run.sh
+
+# Run in headless mode
+./scripts/run.sh --headless
+
+# Build and run in one command
+./scripts/run.sh --build
+
+# Run with GDB debugging support
+./scripts/run.sh --debug
 ```
 
-## Running
-
-Run Nyros in QEMU (with proper terminal I/O):
-
+### Debugging
 ```bash
-# Run the OS
-./scripts/run.sh            # Run existing image
-./scripts/run.sh --build    # Build and run
-./scripts/run.sh --help     # See all options
-
-# The terminal becomes the QEMU monitor
-# Use Ctrl-A H for help, Ctrl-A X to exit
-```
-
-## Debugging
-
-Debug the kernel with GDB:
-
-```bash
-# Terminal 1: Start QEMU in debug mode
+# Terminal 1: Start QEMU with GDB stub
 ./scripts/run.sh --debug
 
 # Terminal 2: Connect GDB
 ./scripts/connect-gdb.sh
-
-# GDB will connect and set breakpoints at kernel entry points
-# Use 'c' to continue, 'si' to step through instructions
 ```
 
-## Project Structure
+## 🎯 IDE/Editor Setup
+
+### Automatic Setup
+The project includes configurations for popular editors:
+
+```bash
+# Set up VS Code
+./dev-setup/setup-dev-env.sh --vscode
+
+# Check what editors are supported
+./dev-setup/setup-dev-env.sh --help
+```
+
+### Manual Setup
+All editors with clangd/LSP support work out of the box:
+- **Configuration**: `.clangd` (language server)
+- **Formatting**: `.clang-format` 
+- **Universal settings**: `.editorconfig`
+- **Build database**: `compile_commands.json` (auto-generated)
+
+Supported editors include VS Code, Vim/Neovim, Emacs, CLion, and more.
+
+## 🏗️ Project Structure
 
 ```
 nyros/
-├── kernel/           # Kernel source code
-│   ├── include/      # Header files
-│   ├── src/          # Source files
-│   └── nyros.ld      # Linker script
-├── cmake/            # CMake modules
-├── scripts/          # Build and run scripts
-├── grub/             # GRUB configuration and fonts
-└── ovmf/             # UEFI firmware for testing
+├── kernel/                 # Kernel source code
+│   ├── include/           # Header files
+│   │   ├── arch/x86/      # x86_64 architecture-specific headers
+│   │   ├── boot/          # Boot-related headers
+│   │   ├── core/          # Core kernel headers
+│   │   ├── ports/         # I/O port access
+│   │   └── serial/        # Serial communication
+│   └── src/               # Source files
+│       ├── arch/x86/      # x86_64 implementation
+│       ├── boot/          # Boot and initialization
+│       ├── ports/         # I/O port implementation
+│       └── serial/        # Serial driver
+├── grub/                  # GRUB bootloader configuration
+├── scripts/               # Build and utility scripts
+├── dev-setup/             # Development environment templates
+├── cmake/                 # CMake modules and configuration
+└── ovmf/                  # UEFI firmware for QEMU
 ```
 
-## Build Configuration
+## 🔧 Configuration Options
 
-Key CMake options:
-- `CMAKE_BUILD_TYPE`: Debug/Release (default: Debug)
-- `NYROS_OPTIMIZATION_LEVEL`: 0-3, s, z (default: 2)
-- `NYROS_BUILD_TESTS`: Build unit tests (default: OFF)
-- `NYROS_ARCH`: Target architecture (default: x86_64)
+### Build Types
+```bash
+# Debug build (default) - no optimization (-O0), optimized for debugging
+./configure.sh --debug
 
-## Features
+# Release build - full optimization (-O2), optimized for performance
+./configure.sh --release
 
-Current features:
-- x86_64 architecture support
-- UEFI/BIOS hybrid boot via GRUB2
-- Higher-half kernel (0xffffffff80000000)
-- Serial port driver for console output
-- Modern CMake/Ninja build system
+# Override optimization level for any build type
+./configure.sh --debug -O1      # Debug build with minimal optimization
+./configure.sh --release -O0    # Release build with no optimization
+```
 
-## License
+### Compiler Selection
+```bash
+# Use Clang (recommended)
+./configure.sh --clang
 
-See LICENSE file for details.
+# Use GCC
+./configure.sh --gcc
+```
+
+### Advanced Options
+```bash
+# Enable unit tests
+./configure.sh --enable-tests
+
+# Enable Link Time Optimization (release builds)
+./configure.sh --enable-lto
+
+# Verbose build output
+./configure.sh --verbose
+
+# Custom build directory
+./configure.sh --build-dir my-build
+
+# Use different generator
+./configure.sh --generator "Unix Makefiles"
+```
+
+## 🚀 Current Features
+
+- **Boot Process**: Multiboot2 compliant bootloader integration
+- **Architecture**: x86_64 long mode with higher-half kernel mapping
+- **Memory Management**: Basic paging setup with identity and higher-half mapping
+- **I/O**: Serial port communication for early debugging
+- **Build System**: Modern CMake-based build with Ninja
+- **Development**: Comprehensive IDE support and debugging tools
+
+## 🎯 Development Goals
+
+- **Modern C++**: Leveraging C++20 features for kernel development
+- **Performance**: Efficient memory management and optimized code paths
+- **Maintainability**: Clean, well-documented, and modular codebase
+- **Portability**: Designed for easy extension to other architectures
+- **Developer Experience**: Excellent tooling and debugging support
+
+## 🤝 Contributing
+
+We welcome contributions! Here's how to get started:
+
+1. **Set up your environment** using the quick start guide above
+2. **Read the code** - explore the kernel structure and existing implementations
+3. **Pick an issue** - check the GitHub issues for "good first issue" labels
+4. **Make your changes** - follow the existing code style and conventions
+5. **Test thoroughly** - ensure your changes build and run correctly
+6. **Submit a PR** - provide a clear description of your changes
+
+### Code Style
+- **Formatting**: Code is automatically formatted with `.clang-format`
+- **Naming**: Use descriptive names following existing conventions
+- **Comments**: Document complex logic and architectural decisions
+- **Commits**: Write clear, concise commit messages
+
+### Testing Your Changes
+```bash
+# Build and test basic functionality
+ninja -C build && ./scripts/run.sh
+
+# Test with different configurations
+./configure.sh --gcc --release && ninja -C build
+./configure.sh --clang --debug && ninja -C build
+
+# Debug with GDB if needed
+./scripts/run.sh --debug
+```
+
+## 📚 Resources
+
+- **Kernel Development**: [OSDev Wiki](https://wiki.osdev.org/)
+- **x86_64 Architecture**: [Intel Software Developer Manuals](https://software.intel.com/content/www/us/en/develop/articles/intel-sdm.html)
+- **C++20 Features**: [cppreference.com](https://en.cppreference.com/)
+- **CMake Documentation**: [cmake.org](https://cmake.org/documentation/)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- The OSDev community for excellent documentation and resources
+- GRUB developers for the robust bootloader
+- QEMU team for the excellent emulation platform
+- Clang/LLVM and GCC teams for outstanding compiler toolchains
+
+---
+
+**Happy kernel hacking! 🚀**
