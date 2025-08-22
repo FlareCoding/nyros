@@ -237,6 +237,13 @@ We welcome contributions! Here's how to get started:
 # Build and test basic functionality
 ninja -C build && ./scripts/run.sh
 
+# Run local CI checks (same as GitHub Actions)
+./scripts/run-ci-checks.sh
+
+# Test specific aspects
+./scripts/run-ci-checks.sh --static-analysis-only  # clang-tidy and cppcheck
+./scripts/run-ci-checks.sh --build-tests-only      # Build matrix testing
+
 # Test with different configurations
 ./configure.sh --gcc --release && ninja -C build
 ./configure.sh --clang --debug && ninja -C build
@@ -244,6 +251,21 @@ ninja -C build && ./scripts/run.sh
 # Debug with GDB if needed
 ./scripts/run.sh --debug
 ```
+
+### Code Quality Standards
+We maintain high code quality through automated CI checks:
+
+- **Static Analysis**: clang-tidy and cppcheck for bug detection
+- **Build Matrix**: GCC 11-12, Clang 14-15 across Debug/Release
+- **Optimization Testing**: -O0 through -O3 and -Os
+- **Boot Testing**: QEMU integration tests
+
+Install pre-commit hooks to catch issues early:
+```bash
+./dev-setup/setup-dev-env.sh --pre-commit-hook
+```
+
+Our CI uses industry-standard tools with pinned versions for reproducible builds.
 
 ## 📚 Resources
 

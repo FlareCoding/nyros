@@ -20,6 +20,32 @@ echo "   Nyros Development Environment Setup   "
 echo "========================================="
 echo ""
 
+# Function to install pre-commit hook
+install_pre_commit_hook() {
+    echo -e "${BLUE}Installing pre-commit hook...${NC}"
+    
+    if [ ! -d "$PROJECT_ROOT/.git" ]; then
+        echo -e "${RED}Error: Not a git repository${NC}"
+        return 1
+    fi
+    
+    if [ -f "$PROJECT_ROOT/.git/hooks/pre-commit" ]; then
+        echo -e "${YELLOW}Warning: pre-commit hook already exists${NC}"
+        read -p "Do you want to overwrite it? (y/N): " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "Skipping pre-commit hook installation"
+            return
+        fi
+    fi
+    
+    cp "$SCRIPT_DIR/pre-commit-hook" "$PROJECT_ROOT/.git/hooks/pre-commit"
+    chmod +x "$PROJECT_ROOT/.git/hooks/pre-commit"
+    echo -e "${GREEN}Pre-commit hook installed${NC}"
+    echo "  - Will run formatting and static analysis checks before commits"
+    echo "  - To bypass: git commit --no-verify"
+}
+
 # Function to setup VS Code
 setup_vscode() {
     echo -e "${BLUE}Setting up VS Code configuration...${NC}"
@@ -158,6 +184,9 @@ case "${1:-}" in
     --vscode)
         setup_vscode
         ;;
+    --pre-commit-hook)
+        install_pre_commit_hook
+        ;;
     --check-deps)
         check_dependencies
         ;;
@@ -177,11 +206,12 @@ case "${1:-}" in
         echo "Usage: $0 [option]"
         echo ""
         echo "Options:"
-        echo "  --vscode      Set up VS Code configuration"
-        echo "  --check-deps  Check for required development dependencies"
-        echo "  --build       Configure and run initial build"
-        echo "  --all         Run dependency check, build, and show editor instructions"
-        echo "  --help, -h    Show this help message"
+        echo "  --vscode           Set up VS Code configuration"
+        echo "  --pre-commit-hook  Install git pre-commit hook for code quality checks"
+        echo "  --check-deps       Check for required development dependencies"
+        echo "  --build            Configure and run initial build"
+        echo "  --all              Run dependency check, build, and show editor instructions"
+        echo "  --help, -h         Show this help message"
         echo ""
         echo "For manual setup, see: dev-setup/README.md"
         ;;
@@ -192,11 +222,12 @@ case "${1:-}" in
         echo ""
         echo "1) Complete setup (check deps + build + editor instructions)"
         echo "2) VS Code configuration only"
-        echo "3) Check dependencies only"
-        echo "4) Configure build system only"
-        echo "5) Show editor setup instructions"
+        echo "3) Install pre-commit hook"
+        echo "4) Check dependencies only"
+        echo "5) Configure build system only"
+        echo "6) Show editor setup instructions"
         echo ""
-        read -p "Enter choice [1-5]: " -n 1 -r
+        read -p "Enter choice [1-6]: " -n 1 -r
         echo ""
         
         case $REPLY in
@@ -211,12 +242,15 @@ case "${1:-}" in
                 setup_vscode
                 ;;
             3)
-                check_dependencies
+                install_pre_commit_hook
                 ;;
             4)
-                initial_build
+                check_dependencies
                 ;;
             5)
+                initial_build
+                ;;
+            6)
                 show_editor_instructions
                 ;;
             *)
