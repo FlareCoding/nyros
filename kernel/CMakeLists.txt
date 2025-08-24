@@ -8,6 +8,10 @@
 cmake_minimum_required(VERSION 3.20)
 project(nyros-kernel LANGUAGES C CXX ASM)
 
+# Treat .h files as C++ headers
+file(GLOB_RECURSE ALL_HEADERS "include/**/*.h")
+set_source_files_properties(${ALL_HEADERS} PROPERTIES LANGUAGE CXX)
+
 # =============================================================================
 # Source Files Collection
 # =============================================================================
@@ -20,6 +24,7 @@ file(GLOB_RECURSE COMMON_SOURCES
     src/boot/*.cpp
     src/serial/*.cpp
     src/ports/*.cpp
+    src/memory/*.cpp
 )
 
 # Architecture-specific sources
