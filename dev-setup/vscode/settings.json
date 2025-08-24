@@ -10,6 +10,10 @@
     // Disable features that don't apply to kernel development
     "C_Cpp.default.systemIncludePath": [],
     "C_Cpp.autoAddFileAssociations": false,
+    // Disable C/C++ extension inlay hints
+    "C_Cpp.inlayHints.parameterNames.enabled": false,
+    "C_Cpp.inlayHints.referenceOperator.enabled": false,
+    "C_Cpp.inlayHints.autoDeclarationTypes.enabled": false,
     // CMake configuration
     "cmake.configureOnOpen": false,
     "cmake.buildDirectory": "${workspaceFolder}/build",
@@ -21,7 +25,8 @@
         "--clang-tidy",
         "--header-insertion=never",
         "--pch-storage=memory",
-        "--function-arg-placeholders=false"
+        "--function-arg-placeholders=false",
+        "--inlay-hints=false"
     ],
     // File associations
     "files.associations": {
@@ -40,6 +45,8 @@
         80,
         100
     ],
+    // Disable inlay hints (parameter name overlays)
+    "editor.inlayHints.enabled": "off",
     // Exclude build artifacts from search
     "files.exclude": {
         "**/build": true,

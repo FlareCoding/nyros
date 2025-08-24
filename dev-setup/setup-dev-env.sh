@@ -114,6 +114,15 @@ check_dependencies() {
         missing_deps+=("mtools")
     fi
     
+    # Check for static analysis tools
+    if ! command -v clang-tidy &> /dev/null; then
+        missing_deps+=("clang-tidy")
+    fi
+    
+    if ! command -v cppcheck &> /dev/null; then
+        missing_deps+=("cppcheck")
+    fi
+    
     if [ ${#missing_deps[@]} -eq 0 ]; then
         echo -e "${GREEN}✓ All dependencies are installed${NC}"
     else

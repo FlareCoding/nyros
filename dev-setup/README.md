@@ -66,6 +66,7 @@ Simply import the project as a CMake project. The IDE will automatically use the
 ### Required Tools
 - **Compiler**: Clang or GCC (Clang recommended)
 - **Build System**: CMake 3.20+, Ninja
+- **Static Analysis**: clang-tidy, cppcheck
 - **Emulation**: QEMU (qemu-system-x86_64)
 - **Debugging**: GDB
 - **Image Creation**: grub-mkrescue, xorriso, mtools
@@ -76,6 +77,7 @@ Simply import the project as a CMake project. The IDE will automatically use the
 ```bash
 sudo apt update && sudo apt install -y \
     clang ninja-build cmake \
+    clang-tidy cppcheck \
     qemu-system-x86 gdb \
     grub-pc-bin grub2-common \
     xorriso mtools
@@ -85,6 +87,7 @@ sudo apt update && sudo apt install -y \
 ```bash
 sudo dnf install -y \
     clang ninja-build cmake \
+    clang-tools-extra cppcheck \
     qemu-system-x86 gdb \
     grub2-tools-extra grub2-pc-modules \
     xorriso mtools
@@ -94,8 +97,26 @@ sudo dnf install -y \
 ```bash
 sudo pacman -S \
     clang ninja cmake \
+    clang cppcheck \
     qemu-arch-extra gdb \
     grub xorriso mtools
+```
+
+### Optional: Latest Static Analysis Tools
+
+For enhanced static analysis (more comprehensive checks), you can install the latest clang-tidy from the LLVM repository:
+
+```bash
+# Add LLVM repository (Ubuntu/Debian)
+wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+sudo add-apt-repository "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy main"
+sudo apt update
+
+# Install latest clang-tidy
+sudo apt install clang-tidy-22
+
+# Set as default
+sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-22 100
 ```
 
 ## First Build
