@@ -28,15 +28,22 @@ typedef __UINT64_TYPE__ uint64_t;
 typedef __UINT64_TYPE__ size_t;
 #endif
 
+typedef uint64_t uintptr_t;
+
+// These need to remain as macros for kernel compatibility
+// NOLINTNEXTLINE(cppcoreguidelines-macro-to-enum,modernize-macro-to-enum)
 #define UINTPTR_MAX 18446744073709551615UL
+// NOLINTNEXTLINE(cppcoreguidelines-macro-to-enum,modernize-macro-to-enum)
 #define SIZE_MAX UINTPTR_MAX
 
-typedef uint64_t uintptr_t;
+// NULL must be a macro for C compatibility
+// NOLINTNEXTLINE(cppcoreguidelines-macro-to-enum,modernize-macro-to-enum)
 #define NULL 0
 
+// offsetof must be a macro as it uses compiler intrinsics
 #define offsetof(type, member) ((uintptr_t)&(((type*)0)->member))
 
-#if defined(__cplusplus)
+#ifdef __cplusplus
 #define EXTERN_C extern "C"
 #else
 #define EXTERN_C extern
