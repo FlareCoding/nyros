@@ -15,9 +15,6 @@ AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AllowShortBlocksOnASingleLine: false
 
-# Braces - use Linux kernel style
-BreakBeforeBraces: Linux
-
 # Indentation
 IndentCaseLabels: true
 IndentPPDirectives: None
