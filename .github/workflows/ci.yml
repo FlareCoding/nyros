@@ -54,7 +54,7 @@ jobs:
       fail-fast: false
       matrix:
         compiler: ["gcc", "clang"]
-        build-type: ["Debug", "Release"]
+        build-type: ["debug", "release"]
 
     steps:
       - name: Checkout code

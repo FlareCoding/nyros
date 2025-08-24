@@ -64,9 +64,6 @@ Checks: >
 # Header filter to only check project files
 HeaderFilterRegex: 'kernel/.*'
 
-# Analysis options
-AnalyzeTemporaryDtors: false
-
 CheckOptions:
   # Naming conventions for kernel code
   - key: readability-identifier-naming.ClassCase

@@ -5,8 +5,8 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-if [ -f "$SCRIPT_DIR/../scripts/run-ci-checks.sh" ]; then
-    PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+if [ -f "$SCRIPT_DIR/../../scripts/run-ci-checks.sh" ]; then
+    PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 elif [ -f "$SCRIPT_DIR/scripts/run-ci-checks.sh" ]; then
     PROJECT_ROOT="$SCRIPT_DIR"
 else
