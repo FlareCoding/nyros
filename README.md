@@ -36,10 +36,10 @@ The setup script will check these automatically:
 
 ### Quick Install (Ubuntu/Debian)
 ```bash
-sudo apt update && sudo apt install -y \\
-    clang ninja-build cmake \\
-    qemu-system-x86 gdb \\
-    grub-pc-bin grub2-common \\
+sudo apt update && sudo apt install -y \
+    clang ninja-build cmake \
+    qemu-system-x86 gdb \
+    grub-pc-bin grub2-common \
     xorriso mtools
 ```
 
@@ -48,18 +48,18 @@ sudo apt update && sudo apt install -y \\
 
 #### Fedora
 ```bash
-sudo dnf install -y \\
-    clang ninja-build cmake \\
-    qemu-system-x86 gdb \\
-    grub2-tools-extra grub2-pc-modules \\
+sudo dnf install -y \
+    clang ninja-build cmake \
+    qemu-system-x86 gdb \
+    grub2-tools-extra grub2-pc-modules \
     xorriso mtools
 ```
 
 #### Arch Linux
 ```bash
-sudo pacman -S \\
-    clang ninja cmake \\
-    qemu-arch-extra gdb \\
+sudo pacman -S \
+    clang ninja cmake \
+    qemu-arch-extra gdb \
     grub xorriso mtools
 ```
 </details>

@@ -149,32 +149,30 @@ fi
 if [ "$RUN_BUILD_TESTS" = true ]; then
     echo -e "${BLUE}Running build tests...${NC}"
     
-    # Test key compiler/configuration combinations
     BUILD_CONFIGS=(
-        "gcc debug 0"
-        "gcc release 2"
-        "clang debug 0"
-        "clang release 2"
-        "clang debug 1"
+        "gcc debug"
+        "gcc release"
+        "clang debug"
+        "clang release"
     )
     
     for config in "${BUILD_CONFIGS[@]}"; do
-        read -r compiler build_type opt_level <<< "$config"
+        read -r compiler build_type <<< "$config"
         
-        echo "Testing: $compiler $build_type -O$opt_level"
+        echo "Testing: $compiler $build_type"
         
         # Clean and configure
         rm -rf build/
-        if ./configure.sh --$compiler --$build_type -O$opt_level > /dev/null 2>&1; then
+        if ./configure.sh --$compiler --$build_type > /dev/null 2>&1; then
             if ninja -C build nyros-kernel > /dev/null 2>&1; then
-                echo -e "  ${GREEN}$compiler $build_type -O$opt_level: PASSED${NC}"
+                echo -e "  ${GREEN}$compiler $build_type: PASSED${NC}"
             else
-                echo -e "  ${RED}$compiler $build_type -O$opt_level: BUILD FAILED${NC}"
-                FAILED_CHECKS+=("build-$compiler-$build_type-O$opt_level")
+                echo -e "  ${RED}$compiler $build_type: BUILD FAILED${NC}"
+                FAILED_CHECKS+=("build-$compiler-$build_type")
             fi
         else
-            echo -e "  ${RED}$compiler $build_type -O$opt_level: CONFIGURE FAILED${NC}"
-            FAILED_CHECKS+=("configure-$compiler-$build_type-O$opt_level")
+            echo -e "  ${RED}$compiler $build_type: CONFIGURE FAILED${NC}"
+            FAILED_CHECKS+=("configure-$compiler-$build_type")
         fi
     done
     

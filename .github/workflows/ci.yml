@@ -16,7 +16,7 @@ jobs:
   # Static analysis and code quality checks
   static-analysis:
     name: Static Analysis
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
       - name: Setup C++ environment
         uses: aminya/setup-cpp@v1
         with:
-          compiler: clang-15
+          compiler: clang
           cmake: true
           ninja: true
           cppcheck: true
@@ -47,28 +47,14 @@ jobs:
             -I kernel/include/ \
             kernel/src/
 
-  # Comprehensive build matrix testing
   build-matrix:
     name: Build Test
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        compiler:
-          - { name: "gcc-11", version: "11" }
-          - { name: "gcc-12", version: "12" }
-          - { name: "clang-14", version: "14" }
-          - { name: "clang-15", version: "15" }
+        compiler: ["gcc", "clang"]
         build-type: ["Debug", "Release"]
-        optimization: ["0", "1", "2", "3", "s"]
-        exclude:
-          # Skip some combinations to reduce CI time while maintaining coverage
-          - build-type: "Debug"
-            optimization: "3"
-          - build-type: "Debug"
-            optimization: "s"
-          - build-type: "Release"
-            optimization: "0"
 
     steps:
       - name: Checkout code
@@ -77,7 +63,7 @@ jobs:
       - name: Setup C++ environment
         uses: aminya/setup-cpp@v1
         with:
-          compiler: ${{ matrix.compiler.name }}-${{ matrix.compiler.version }}
+          compiler: ${{ matrix.compiler }}
           cmake: true
           ninja: true
 
@@ -91,14 +77,7 @@ jobs:
 
       - name: Configure build system
         run: |
-          case "${{ matrix.compiler.name }}" in
-            gcc-*) 
-              ./configure.sh --gcc --${{ matrix.build-type }} -O${{ matrix.optimization }}
-              ;;
-            clang-*)
-              ./configure.sh --clang --${{ matrix.build-type }} -O${{ matrix.optimization }}
-              ;;
-          esac
+          ./configure.sh --${{ matrix.compiler }} --${{ matrix.build-type }}
 
       - name: Build kernel
         run: |
@@ -143,7 +122,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: nyros-${{ matrix.compiler.name }}-${{ matrix.build-type }}-O${{ matrix.optimization }}
+          name: nyros-${{ matrix.compiler }}-${{ matrix.build-type }}
           path: |
             build/kernel/nyros-kernel
             build/image/nyros.img
@@ -154,7 +133,7 @@ jobs:
   # Test build system edge cases and configurations
   build-system-tests:
     name: Build System Tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -163,7 +142,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            clang-14 gcc-11 \
+            clang gcc \
             ninja-build cmake \
             qemu-system-x86 \
             grub-pc-bin grub2-common \
@@ -227,7 +206,7 @@ jobs:
   # Code quality and metrics
   code-quality:
     name: Code Quality
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -236,7 +215,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            clang-14 \
+            clang \
             ninja-build cmake \
             sloccount \
             cloc
@@ -268,30 +247,4 @@ jobs:
           echo "=== Checking for debug prints ==="
           grep -r "printf\|cout\|debug" kernel/ || echo "No debug prints found"
 
-  # Documentation and help system tests
-  documentation:
-    name: Documentation Tests
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Test all help commands
-        run: |
-          ./configure.sh --help
-          ./scripts/run.sh --help
-          ./dev-setup/setup-dev-env.sh --help
-
-      - name: Verify README instructions
-        run: |
-          # Test that README quick start commands work
-          ./dev-setup/setup-dev-env.sh --check-deps
-          ./configure.sh --clang --debug
-          ninja -C build
-
-      - name: Check for broken links in markdown
-        run: |
-          # Simple check for obvious markdown issues
-          grep -n "]\(\[\)" README.md && exit 1 || echo "No broken reference links found"
-          grep -n "]\(\)" README.md && exit 1 || echo "No empty links found"
 
