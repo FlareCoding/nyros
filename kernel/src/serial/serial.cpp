@@ -94,7 +94,7 @@ char read(uint16_t port) {
     }
 
     // Read and return the character from the data port
-    return inb(data_port_offset(port));
+    return static_cast<char>(inb(data_port_offset(port)));
 }
 
 void set_kernel_uart_port(uint16_t port) {
