@@ -1,60 +1,69 @@
 #include <serial/serial.h>
 
 namespace serial {
-uint16_t g_kernel_uart_port = SERIAL_PORT_BASE_COM1;
-uint16_t g_kernel_gdb_stub_uart_port = SERIAL_PORT_BASE_COM2;
 
-void init_port(uint16_t port, uint16_t baud_rate_divisor) {
+uint16_t g_kernel_uart_port = static_cast<uint16_t>(port_base::COM1);
+uint16_t g_kernel_gdb_stub_uart_port = static_cast<uint16_t>(port_base::COM2);
+
+void init_port(uint16_t port, baud_rate_divisor baud_divisor) {
     // Disable all interrupts
-    outb(SERIAL_INTERRUPT_ENABLE_PORT(port), 0x00);
+    outb(interrupt_enable_port_offset(port), 0x00);
 
     // Configure the baud rate
-    set_baud_rate(port, baud_rate_divisor);
+    set_baud_rate(port, baud_divisor);
 
     // Configure line control: 8 bits, no parity, 1 stop bit
-    outb(SERIAL_LINE_COMMAND_PORT(port), SERIAL_LCR_8_BITS_NO_PARITY_ONE_STOP);
+    outb(line_command_port_offset(port),
+         static_cast<uint8_t>(line_control_flags::EIGHT_BITS_NO_PARITY_ONE_STOP));
 
     // Enable FIFO, clear TX/RX queues, set interrupt trigger level to 14 bytes
-    outb(SERIAL_FIFO_COMMAND_PORT(port),
-         SERIAL_FCR_ENABLE_FIFO |
-         SERIAL_FCR_CLEAR_RECEIVE_FIFO |
-         SERIAL_FCR_CLEAR_TRANSMIT_FIFO |
-         SERIAL_FCR_TRIGGER_14_BYTES);
+    uint8_t fifo_config = static_cast<uint8_t>(fifo_control_flags::ENABLE_FIFO) |
+                          static_cast<uint8_t>(fifo_control_flags::CLEAR_RECEIVE_FIFO) |
+                          static_cast<uint8_t>(fifo_control_flags::CLEAR_TRANSMIT_FIFO) |
+                          static_cast<uint8_t>(fifo_control_flags::TRIGGER_14_BYTES);
+    outb(fifo_command_port_offset(port), fifo_config);
 
     // Set RTS, DSR, and OUT2 to enable interrupts
-    outb(SERIAL_MODEM_COMMAND_PORT(port),
-         SERIAL_MCR_RTS_DSR | SERIAL_MCR_OUT2);
+    uint8_t modem_config = static_cast<uint8_t>(modem_control_flags::RTS_DSR) |
+                           static_cast<uint8_t>(modem_control_flags::OUT2);
+    outb(modem_command_port_offset(port), modem_config);
 
     // Enable "Received Data Available" interrupt
-    outb(SERIAL_INTERRUPT_ENABLE_PORT(port), 0x01);
+    outb(interrupt_enable_port_offset(port), 0x01);
 }
 
-void set_baud_rate(uint16_t port, uint16_t divisor) {
+void set_baud_rate(uint16_t port, baud_rate_divisor divisor) {
     // Enable DLAB (Divisor Latch Access)
-    outb(SERIAL_LINE_COMMAND_PORT(port), SERIAL_LCR_ENABLE_DLAB);
+    outb(line_command_port_offset(port), static_cast<uint8_t>(line_control_flags::ENABLE_DLAB));
 
     // Set baud rate divisor
-    outb(SERIAL_DATA_PORT(port), divisor & 0xFF); // Low byte
-    outb(SERIAL_INTERRUPT_ENABLE_PORT(port), (divisor >> 8) & 0xFF); // High byte
+    auto divisor_value = static_cast<uint8_t>(divisor);
+    outb(data_port_offset(port), divisor_value);    // Low byte
+    outb(interrupt_enable_port_offset(port), 0x00); // High byte (always 0 for these divisors)
 
     // Clear DLAB after setting the divisor
-    outb(SERIAL_LINE_COMMAND_PORT(port), SERIAL_LCR_8_BITS_NO_PARITY_ONE_STOP);
+    outb(line_command_port_offset(port),
+         static_cast<uint8_t>(line_control_flags::EIGHT_BITS_NO_PARITY_ONE_STOP));
 }
 
 bool is_transmit_queue_empty(uint16_t port) {
-    return inb(SERIAL_LINE_STATUS_PORT(port)) & SERIAL_LSR_TRANSMIT_EMPTY;
+    uint8_t status = inb(line_status_port_offset(port));
+    return (status & static_cast<uint8_t>(line_status_flags::TRANSMIT_EMPTY)) != 0;
 }
 
 bool is_data_available(uint16_t port) {
-    return inb(SERIAL_LINE_STATUS_PORT(port)) & SERIAL_LSR_DATA_READY;
+    uint8_t status = inb(line_status_port_offset(port));
+    return (status & static_cast<uint8_t>(line_status_flags::DATA_READY)) != 0;
 }
 
 void write(uint16_t port, char chr) {
     // Wait for the transmit queue to be empty
-    while (!is_transmit_queue_empty(port));
+    while (!is_transmit_queue_empty(port)) {
+        // Busy wait
+    }
 
-    // Write the byte to the serial port
-    outb(port, chr);
+    // Write the byte to the data port
+    outb(data_port_offset(port), chr);
 }
 
 void write(uint16_t port, const char* str) {
@@ -80,13 +89,16 @@ void write(uint16_t port, const char* str, uint32_t length) {
 
 char read(uint16_t port) {
     // Wait until data is available
-    while (!is_data_available(port));
-    
+    while (!is_data_available(port)) {
+        // Busy wait
+    }
+
     // Read and return the character from the data port
-    return inb(SERIAL_DATA_PORT(port));
+    return inb(data_port_offset(port));
 }
 
 void set_kernel_uart_port(uint16_t port) {
     g_kernel_uart_port = port;
 }
+
 } // namespace serial
