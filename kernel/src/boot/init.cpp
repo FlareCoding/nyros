@@ -13,8 +13,13 @@ void init(unsigned int magic, void* mbi) {
 
     // Initialize early stage serial output
     serial::init_port(static_cast<uint16_t>(serial::port_base::COM1));
+    serial::init_port(static_cast<uint16_t>(serial::port_base::COM2),
+                      serial::baud_rate_divisor::BAUD_115200);
 
     serial::write(static_cast<uint16_t>(serial::port_base::COM1), "Hello, world!");
+
+    serial::write(static_cast<uint16_t>(serial::port_base::COM2),
+                  "[BOOT] Serial COM ports initialized\n");
 
     // Idle loop
     while (true) {

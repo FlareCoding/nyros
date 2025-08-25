@@ -2,9 +2,6 @@
 
 namespace serial {
 
-uint16_t g_kernel_uart_port = static_cast<uint16_t>(port_base::COM1);
-uint16_t g_kernel_gdb_stub_uart_port = static_cast<uint16_t>(port_base::COM2);
-
 void init_port(uint16_t port, baud_rate_divisor baud_divisor) {
     // Disable all interrupts
     outb(interrupt_enable_port_offset(port), 0x00);
@@ -95,10 +92,6 @@ char read(uint16_t port) {
 
     // Read and return the character from the data port
     return static_cast<char>(inb(data_port_offset(port)));
-}
-
-void set_kernel_uart_port(uint16_t port) {
-    g_kernel_uart_port = port;
 }
 
 } // namespace serial

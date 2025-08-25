@@ -123,7 +123,8 @@ QEMU_ARGS=(
     -smp 4
     -drive "file=$IMAGE_FILE,format=raw"
     -net none
-    -serial mon:stdio  # This makes your terminal the QEMU monitor
+    -serial mon:stdio  # COM1 - QEMU monitor
+    -serial unix:/tmp/nyros-debug.sock,server,nowait  # COM2 - Debug inspector socket
 )
 
 # Add UEFI firmware if available
@@ -138,7 +139,10 @@ if [ -n "$OVMF_CODE" ] && [ -f "$OVMF_CODE" ]; then
     )
     
     # Clean up temp file on exit
-    trap "rm -f $OVMF_VARS_COPY" EXIT
+    trap "rm -f $OVMF_VARS_COPY /tmp/nyros-debug.sock" EXIT
+else
+    # Clean up debug socket on exit even without OVMF
+    trap "rm -f /tmp/nyros-debug.sock" EXIT
 fi
 
 # Add debug options

@@ -65,12 +65,6 @@ enum class baud_rate_divisor : uint8_t {
     BAUD_1200 = 0x60    // 1200 baud
 };
 
-// I/O address of the UART port to which kernel's serial prints will get directed
-extern uint16_t g_kernel_uart_port;
-
-// I/O address of the UART port to be used for the GDB stub
-extern uint16_t g_kernel_gdb_stub_uart_port;
-
 /**
  * @brief Initializes the specified serial port with default settings.
  *
@@ -169,13 +163,6 @@ void write(uint16_t port, const char* str, uint32_t length);
  * @return char The character read from the serial port.
  */
 char read(uint16_t port);
-
-/**
- * @brief Sets the port to which kernel directs all serial `printf` calls.
- *
- * @param port The I/O address of the port to which direct all kernel serial prints.
- */
-void set_kernel_uart_port(uint16_t port);
 
 } // namespace serial
 
