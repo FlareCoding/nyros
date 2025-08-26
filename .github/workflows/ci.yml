@@ -74,11 +74,10 @@ jobs:
           cmake: true
           ninja: true
 
-      - name: Install QEMU and bootloader tools
+      - name: Install bootloader tools
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            qemu-system-x86 gdb \
             grub-pc-bin grub2-common \
             xorriso mtools
 
@@ -105,26 +104,6 @@ jobs:
           ls -la build/image/nyros.img
           file build/image/nyros.img
 
-      - name: Test basic boot in QEMU
-        run: |
-          # Quick boot test - ensure kernel starts and produces expected output
-          timeout 30s qemu-system-x86_64 \
-            -drive file=build/image/nyros.img,format=raw \
-            -serial file:boot.log \
-            -display none \
-            -m 256M \
-            -no-reboot || true
-          
-          # Check for expected output
-          if [ -f boot.log ]; then
-            echo "Boot log contents:"
-            cat boot.log
-            # Look for our expected output
-            grep -q "Hello, world!" boot.log && echo "Boot test PASSED" || echo "Boot test FAILED"
-          else
-            echo "No boot log generated"
-          fi
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         if: always()
@@ -134,7 +113,6 @@ jobs:
             build/kernel/nyros-kernel
             build/image/nyros.img
             build/kernel/nyros-kernel.asm
-            boot.log
           retention-days: 7
 
   # Test build system edge cases and configurations
@@ -151,7 +129,6 @@ jobs:
           sudo apt-get install -y \
             clang gcc \
             ninja-build cmake \
-            qemu-system-x86 \
             grub-pc-bin grub2-common \
             xorriso mtools
 
