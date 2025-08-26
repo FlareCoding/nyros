@@ -1,0 +1,25 @@
+{
+  "name": "iris-backend",
+  "version": "0.1.0",
+  "description": "IRIS - Kernel debugging backend for Nyros",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "ts-node src/main.ts",
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "kernel",
+    "debugging",
+    "iris",
+    "nyros"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
