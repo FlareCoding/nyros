@@ -31,6 +31,7 @@ file(GLOB_RECURSE COMMON_SOURCES
 # Architecture-specific sources
 if(NYROS_ARCH_X86_64)
     file(GLOB_RECURSE ARCH_SOURCES
+        src/arch/*.cpp
         src/arch/x86/*.cpp
         src/arch/x86/gdt/*.cpp
     )

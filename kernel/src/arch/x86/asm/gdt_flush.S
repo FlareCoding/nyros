@@ -2,8 +2,7 @@
 #ifdef ARCH_X86_64
 
 .code64
-
-.section .ktext
+.section .text
 
 .global asm_flush_gdt
 

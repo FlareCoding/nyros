@@ -1,7 +1,7 @@
 #ifndef IRIS_H
 #define IRIS_H
 
-#include <core/types.h>
+#include <iris/event_types.h>
 #include <serial/serial.h>
 
 namespace iris {

@@ -1,5 +1,5 @@
+#include <arch/arch_init.h>
 #include <boot/multiboot2.h>
-#include <iris/event_types.h>
 #include <iris/iris.h>
 #include <serial/serial.h>
 
@@ -18,11 +18,10 @@ void init(unsigned int magic, void* mbi) {
 
     // Initialize IRIS debug system on COM2
     iris::init();
+    iris::emit(iris::EVENT_BOOT_START, 0, 0);
 
-    // Emit boot event
-    iris::emit(iris::EVENT_BOOT_START, 0, 0); // timestamp=0 (HPET not initialized), cpu=0
-
-    serial::write(static_cast<uint16_t>(serial::port_base::COM1), "Hello, world!");
+    // Hardware and arch-specific setup
+    arch::arch_first_stage_init();
 
     // Idle loop
     while (true) {

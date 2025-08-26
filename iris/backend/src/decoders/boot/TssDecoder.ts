@@ -34,7 +34,7 @@ export class TssDecoder implements IPayloadDecoder {
                 address: this.formatAddress(addr),
                 configured: addr !== 0n
             })),
-            ioMapBase: tss.ioMapBase === 0xFFFF ? 'disabled' : `0x${tss.ioMapBase.toString(16)}`,
+            ioMapBase: tss.ioMapBase === 0xFFFF ? 'disabled' : `0x${tss.ioMapBase.toString(16).toUpperCase()}`,
             summary: {
                 kernelStackConfigured: tss.rsp0 !== 0n,
                 istEntriesConfigured: tss.ist.filter(addr => addr !== 0n).length,
@@ -58,11 +58,7 @@ export class TssDecoder implements IPayloadDecoder {
     }
 
     private formatAddress(addr: bigint): string {
-        if (addr === 0n) {
-            return 'null';
-        }
-
-        const hex = addr.toString(16).padStart(16, '0');
+        const hex = addr.toString(16).padStart(16, '0').toUpperCase();
         return `0x${hex}`;
     }
 }
