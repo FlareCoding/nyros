@@ -13,6 +13,8 @@ inline constexpr uint16_t EVENT_IRIS_INIT = 0x0001; // IRIS system initialized
 
 // Boot Events (0x0100 - 0x01FF)
 inline constexpr uint16_t EVENT_BOOT_START = 0x0100; // Kernel boot started
+inline constexpr uint16_t EVENT_GDT_LOADED = 0x0101; // Global Descriptor Table loaded
+inline constexpr uint16_t EVENT_TSS_LOADED = 0x0102; // Task State Segment loaded
 
 // Future categories reserved:
 // Process/Thread Events (0x0200 - 0x02FF)

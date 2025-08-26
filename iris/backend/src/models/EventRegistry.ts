@@ -89,6 +89,8 @@ export class EventRegistry {
 
         // Boot Events (0x0100 - 0x01FF)
         this.register({ id: 0x0100, name: 'BOOT_START', category: EventCategory.BOOT, description: 'Kernel boot sequence started', severity: EventSeverity.INFO });
+        this.register({ id: 0x0101, name: 'GDT_LOADED', category: EventCategory.BOOT, description: 'Global Descriptor Table loaded', severity: EventSeverity.INFO });
+        this.register({ id: 0x0102, name: 'TSS_LOADED', category: EventCategory.BOOT, description: 'Task State Segment configured', severity: EventSeverity.INFO });
 
         // Future event categories will be added here as they're implemented in the kernel
         // Process/Thread Events (0x0200 - 0x02FF)

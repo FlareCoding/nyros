@@ -2,6 +2,7 @@
 
 import { IrisBackend } from './IrisBackend';
 import { UnixSocketDataSource } from './transport/UnixSocketDataSource';
+import { registerAllDecoders } from './decoders/DecoderRegistration';
 
 const SOCKET_PATH = '/tmp/nyros-debug.sock';
 
@@ -16,6 +17,9 @@ class IrisApplication {
         console.log('=====================================');
         console.log(`[INFO] Socket path: ${SOCKET_PATH}`);
         console.log('[INFO] Waiting for kernel connection...\n');
+
+        // Register payload decoders
+        registerAllDecoders();
 
         this.setupProcessHandlers();
         await this.connectWithRetry();

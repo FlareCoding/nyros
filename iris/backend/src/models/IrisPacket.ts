@@ -10,5 +10,6 @@ export interface IrisPacket {
     sequenceNumber?: number;
     flags?: number;
 
-    payload?: Buffer;
+    payload?: Buffer;       // Raw binary payload
+    decodedPayload?: any;   // Decoded payload (if decoder exists)
 }

@@ -44,6 +44,21 @@ static_assert(sizeof(packet) % 8 == 0, "IRIS packet must be 8-byte aligned");
 void emit(uint16_t event_type, uint64_t timestamp_ns, uint8_t cpu_id);
 
 /**
+ * @brief Emits an IRIS event packet with payload data.
+ *
+ * This function sends an event with additional binary payload data. The payload
+ * is sent immediately after the packet header. No heap allocation occurs.
+ *
+ * @param event_type The type identifier for this event.
+ * @param timestamp_ns System uptime in nanoseconds (use 0 if HPET not initialized).
+ * @param cpu_id The ID of the CPU core generating this event.
+ * @param payload Pointer to payload data (can be any struct or raw memory).
+ * @param payload_size Size of the payload in bytes.
+ */
+void emit_with_payload(uint16_t event_type, uint64_t timestamp_ns, uint8_t cpu_id,
+                       const void* payload, uint16_t payload_size);
+
+/**
  * @brief Initializes the IRIS debug system.
  *
  * Sets up the COM2 serial port for IRIS communication. This should be called

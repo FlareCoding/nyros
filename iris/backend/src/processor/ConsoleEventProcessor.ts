@@ -20,8 +20,17 @@ export class ConsoleEventProcessor implements IEventProcessor {
 
         console.log(
             `[IRIS] ${counter} | ${timestamp} | ${cpuInfo} | ${eventInfo}` +
-            (packet.payload ? colorize(` | ${packet.payload.length} bytes payload`, Colors.dim) : '')
+            (packet.payload ? colorize(` | ${packet.payload.length} bytes`, Colors.dim) : '')
         );
+
+        // Display decoded payload as JSON if available
+        if (packet.decodedPayload) {
+            const jsonStr = JSON.stringify(packet.decodedPayload, null, 2);
+            const lines = jsonStr.split('\n');
+            lines.forEach(line => {
+                console.log(colorize(`       ${line}`, Colors.dim));
+            });
+        }
     }
 
     private formatTimestamp(nanos: bigint): string {

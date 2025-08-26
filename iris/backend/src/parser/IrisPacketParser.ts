@@ -1,6 +1,7 @@
 import { IPacketParser } from './IPacketParser';
 import { RawPacket } from '../protocol/IPacketDecoder';
 import { IrisPacket } from '../models/IrisPacket';
+import { decoderRegistry } from '../decoders/DecoderRegistry';
 
 /**
  * Parser for IRIS binary protocol packets.
@@ -34,6 +35,12 @@ export class IrisPacketParser implements IPacketParser {
             // If there's payload data beyond the header
             if (raw.data.length > this.EXPECTED_HEADER_SIZE) {
                 packet.payload = raw.data.slice(this.EXPECTED_HEADER_SIZE);
+
+                // Try to decode the payload if a decoder is registered
+                const decodedPayload = decoderRegistry.decode(eventType, packet.payload);
+                if (decodedPayload !== undefined) {
+                    packet.decodedPayload = decodedPayload;
+                }
             }
 
             return packet;
