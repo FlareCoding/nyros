@@ -25,6 +25,7 @@ file(GLOB_RECURSE COMMON_SOURCES
     src/serial/*.cpp
     src/ports/*.cpp
     src/memory/*.cpp
+    src/iris/*.cpp
 )
 
 # Architecture-specific sources
