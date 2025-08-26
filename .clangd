@@ -7,6 +7,7 @@ CompileFlags:
   
   # Additional flags to help clangd understand kernel code
   Add:
+    - "-xc++"
     - "-ffreestanding"
     - "-nostdlib"
     - "-fno-builtin"
