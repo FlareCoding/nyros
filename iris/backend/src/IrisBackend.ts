@@ -4,7 +4,8 @@ import { IPacketParser } from './parser/IPacketParser';
 import { IEventProcessor } from './processor/IEventProcessor';
 import { BinaryPacketDecoder } from './protocol/BinaryPacketDecoder';
 import { IrisPacketParser } from './parser/IrisPacketParser';
-import { ConsoleEventProcessor } from './processor/ConsoleEventProcessor';
+import { DefaultEventProcessor } from './processor/DefaultEventProcessor';
+import { WebSocketServer } from './server/WebSocketServer';
 
 /**
  * Main IRIS backend orchestrator.
@@ -15,18 +16,21 @@ export class IrisBackend {
     private decoder: IPacketDecoder;
     private parser: IPacketParser;
     private processor: IEventProcessor;
+    private wsServer?: WebSocketServer;
     private hasReceivedInit = false;
 
     constructor(
         dataSource: IDataSource,
         decoder: IPacketDecoder = new BinaryPacketDecoder(),
         parser: IPacketParser = new IrisPacketParser(),
-        processor: IEventProcessor = new ConsoleEventProcessor()
+        processor: IEventProcessor = new DefaultEventProcessor(),
+        wsServer?: WebSocketServer
     ) {
         this.dataSource = dataSource;
         this.decoder = decoder;
         this.parser = parser;
         this.processor = processor;
+        this.wsServer = wsServer;
 
         this.wireComponents();
     }
@@ -40,7 +44,7 @@ export class IrisBackend {
             this.decoder.write(data);
         });
 
-        // Decoder → Parser → Processor
+        // Decoder → Parser → Processor → WebSocket
         this.decoder.onPacket((rawPacket) => {
             const packet = this.parser.parse(rawPacket);
             if (packet) {
@@ -49,7 +53,14 @@ export class IrisBackend {
                     this.hasReceivedInit = true;
                     console.log('[IRIS] Kernel connection established');
                 }
+
+                // Process to console
                 this.processor.process(packet);
+
+                // Broadcast to WebSocket clients if server is available
+                if (this.wsServer) {
+                    this.wsServer.broadcast(packet);
+                }
             }
         });
 
@@ -88,6 +99,12 @@ export class IrisBackend {
      */
     stop(): void {
         console.log('[IRIS] Stopping backend...');
+
+        // Shutdown WebSocket server if present
+        if (this.wsServer) {
+            this.wsServer.shutdown();
+        }
+
         this.dataSource.disconnect();
     }
 }

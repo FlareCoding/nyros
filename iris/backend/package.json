@@ -19,7 +19,13 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^24.3.0",
+    "@types/ws": "^8.18.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.1.0",
+    "@fastify/websocket": "^11.2.0",
+    "fastify": "^5.5.0"
   }
 }
