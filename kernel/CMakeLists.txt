@@ -84,6 +84,8 @@ endif()
 set_target_properties(nyros-kernel PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/kernel
     OUTPUT_NAME nyros-kernel
+    SKIP_BUILD_RPATH TRUE
+    SKIP_INSTALL_RPATH TRUE
 )
 
 # =============================================================================
@@ -132,6 +134,11 @@ if(NYROS_BUILD_TESTS)
         nyros_apply_kernel_options(nyros-kernel-tests)
         target_compile_definitions(nyros-kernel-tests PRIVATE BUILD_UNIT_TESTS RUN_TESTS)
         nyros_set_linker_script(nyros-kernel-tests ${KERNEL_LINKER_SCRIPT})
+
+        set_target_properties(nyros-kernel-tests PROPERTIES
+            SKIP_BUILD_RPATH TRUE
+            SKIP_INSTALL_RPATH TRUE
+        )
     endif()
 endif()
 
